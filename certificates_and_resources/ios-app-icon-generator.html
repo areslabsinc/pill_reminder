@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS App Icon Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .info {
+            background: #e8f4f8;
+            border-left: 4px solid #0084ff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: #f8f8f8;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        canvas {
+            border-radius: 22.37%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            background: #0084ff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #0066cc;
+        }
+        
+        .size-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .size-btn {
+            background: #f0f0f0;
+            color: #333;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        .size-btn.active {
+            background: #0084ff;
+            color: white;
+        }
+        
+        .download-info {
+            background: #f0f9ff;
+            border: 1px solid #0084ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Pill Reminder App Icon</h1>
+        
+        <div class="info">
+            <strong>✅ iOS Compatible:</strong> This icon has NO transparency and will pass App Store validation.
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="iconCanvas" width="1024" height="1024"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="size-selector">
+                <button class="size-btn active" onclick="setSize(1024)">1024px</button>
+                <button class="size-btn" onclick="setSize(512)">512px</button>
+                <button class="size-btn" onclick="setSize(256)">256px</button>
+                <button class="size-btn" onclick="setSize(128)">128px</button>
+            </div>
+            
+            <button onclick="downloadIcon()">Download Icon</button>
+        </div>
+        
+        <div class="download-info">
+            <strong>How to use:</strong><br>
+            1. Click "Download Icon" to save the 1024x1024 version<br>
+            2. This PNG has no transparency - perfect for iOS<br>
+            3. Use this as your main app icon in Xcode or Expo<br>
+            4. The icon will be automatically resized for all required sizes
+        </div>
+    </div>
+
+    <script>
+        let currentSize = 1024;
+        const canvas = document.getElementById('iconCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function drawIcon(size) {
+            canvas.width = size;
+            canvas.height = size;
+            canvas.style.width = Math.min(size, 256) + 'px';
+            canvas.style.height = Math.min(size, 256) + 'px';
+            
+            const scale = size / 1024;
+            
+            // IMPORTANT: Fill the entire canvas with the gradient background
+            // This ensures NO transparency
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#7FB069');
+            gradient.addColorStop(0.5, '#A8C09A');
+            gradient.addColorStop(1, '#B1C5D4');
+            
+            // Fill entire canvas - no transparent pixels
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Draw the pill shape
+            ctx.save();
+            ctx.translate(size/2, size/2);
+            ctx.rotate(-20 * Math.PI / 180);
+            
+            // White pill background - fully opaque
+            ctx.fillStyle = '#FFFFFF';
+            const pillWidth = 400 * scale;
+            const pillHeight = 140 * scale;
+            const radius = pillHeight / 2;
+            
+            ctx.beginPath();
+            ctx.moveTo(-pillWidth/2 + radius, -pillHeight/2);
+            ctx.lineTo(pillWidth/2 - radius, -pillHeight/2);
+            ctx.arc(pillWidth/2 - radius, 0, radius, -Math.PI/2, Math.PI/2);
+            ctx.lineTo(-pillWidth/2 + radius, pillHeight/2);
+            ctx.arc(-pillWidth/2 + radius, 0, radius, Math.PI/2, -Math.PI/2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Blue line on pill
+            ctx.strokeStyle = '#4FC3F7';
+            ctx.lineWidth = 6 * scale;
+            ctx.beginPath();
+            ctx.moveTo(-60 * scale, -pillHeight/2);
+            ctx.lineTo(-60 * scale, pillHeight/2);
+            ctx.stroke();
+            
+            // Heart on pill
+            ctx.fillStyle = '#FFB3B3';
+            drawHeart(ctx, 30 * scale, 0, 60 * scale);
+            
+            // Green circle with "L"
+            ctx.fillStyle = '#7FB069';
+            ctx.beginPath();
+            ctx.arc(150 * scale, -80 * scale, 40 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = `bold ${36 * scale}px -apple-system, Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('L', 150 * scale, -80 * scale);
+            
+            ctx.restore();
+        }
+        
+        function drawHeart(ctx, x, y, size) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(size/100, size/100);
+            
+            ctx.beginPath();
+            ctx.moveTo(0, 30);
+            ctx.bezierCurveTo(-50, -20, -50, -70, 0, -40);
+            ctx.bezierCurveTo(50, -70, 50, -20, 0, 30);
+            ctx.closePath();
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function setSize(size) {
+            currentSize = size;
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            drawIcon(size);
+        }
+        
+        function downloadIcon() {
+            // Create a temporary canvas at 1024x1024 for download
+            const downloadCanvas = document.createElement('canvas');
+            const downloadCtx = downloadCanvas.getContext('2d');
+            downloadCanvas.width = 1024;
+            downloadCanvas.height = 1024;
+            
+            // Draw the icon at full size
+            const tempCtx = downloadCtx;
+            const size = 1024;
+            
+            // Redraw at 1024x1024
+            const gradient = tempCtx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#7FB069');
+            gradient.addColorStop(0.5, '#A8C09A');
+            gradient.addColorStop(1, '#B1C5D4');
+            
+            tempCtx.fillStyle = gradient;
+            tempCtx.fillRect(0, 0, size, size);
+            
+            tempCtx.save();
+            tempCtx.translate(size/2, size/2);
+            tempCtx.rotate(-20 * Math.PI / 180);
+            
+            tempCtx.fillStyle = '#FFFFFF';
+            const pillWidth = 400;
+            const pillHeight = 140;
+            const radius = pillHeight / 2;
+            
+            tempCtx.beginPath();
+            tempCtx.moveTo(-pillWidth/2 + radius, -pillHeight/2);
+            tempCtx.lineTo(pillWidth/2 - radius, -pillHeight/2);
+            tempCtx.arc(pillWidth/2 - radius, 0, radius, -Math.PI/2, Math.PI/2);
+            tempCtx.lineTo(-pillWidth/2 + radius, pillHeight/2);
+            tempCtx.arc(-pillWidth/2 + radius, 0, radius, Math.PI/2, -Math.PI/2);
+            tempCtx.closePath();
+            tempCtx.fill();
+            
+            tempCtx.strokeStyle = '#4FC3F7';
+            tempCtx.lineWidth = 6;
+            tempCtx.beginPath();
+            tempCtx.moveTo(-60, -pillHeight/2);
+            tempCtx.lineTo(-60, pillHeight/2);
+            tempCtx.stroke();
+            
+            tempCtx.fillStyle = '#FFB3B3';
+            drawHeart(tempCtx, 30, 0, 60);
+            
+            tempCtx.fillStyle = '#7FB069';
+            tempCtx.beginPath();
+            tempCtx.arc(150, -80, 40, 0, Math.PI * 2);
+            tempCtx.fill();
+            
+            tempCtx.fillStyle = '#FFFFFF';
+            tempCtx.font = 'bold 36px -apple-system, Arial';
+            tempCtx.textAlign = 'center';
+            tempCtx.textBaseline = 'middle';
+            tempCtx.fillText('L', 150, -80);
+            
+            tempCtx.restore();
+            
+            // Download the image
+            downloadCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'pill-reminder-icon-1024.png';
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png', 1.0);
+        }
+        
+        // Initial draw
+        drawIcon(1024);
+    </script>
+</body>
+</html>
